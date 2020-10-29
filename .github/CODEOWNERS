@@ -1,0 +1,4 @@
+# https://help.github.com/en/articles/about-code-owners#codeowners-syntax
+# People in this file are automatically assigned as reviewers to any pull requests
+
+*   @carolynvs @vdice
