@@ -67,11 +67,12 @@ Enhancement Proposal:
 
 ## Specification
 
-Before creating a PEP, discuss the idea first with the maintainers to make sure
-they agree that the idea is suitable and welcome. This is to make sure someone
-doesn't waste time writing a PEP when a solution already exists, it doesn't
-duplicate or overlap with an exiting proposal, it hasn't been proposed and
-rejected already, and that the general idea is going in the right direction. 
+Before creating a PEP, discuss the idea first with the maintainers on our
+[forum] and validate that the idea is suitable and welcome. This is to make sure
+someone doesn't waste time writing a PEP when a solution already exists, it
+doesn't duplicate or overlap with an exiting proposal, it hasn't been proposed
+and rejected already, and that the general idea is going in the right direction.
+
 
 
 ### PEP types
@@ -164,7 +165,7 @@ Every PEP should have the following sections:
 1. [Backwards Compatibility](#backwards-compatibility)
 1. [Security Implications](#security-implications)
 1. [Rejected Ideas](#rejected-ideas)
-1. [Open Issues](#open-issues)
+1. [Open Questions](#open-questions)
 
 #### Preamble
 
@@ -207,9 +208,9 @@ The rationale should provide evidence of consensus within the community and disc
 The technical specification should describe the command and/or configuration
 syntax and semantics of any new feature.
 
-* If this is a command, we are looking for what the `porter COMMAND**: help`
-  would look like: description of command, arguments, flags, default behavior
-  and error handling.
+* If this is a command, we are looking for what the `porter help` would look
+  like: description of command, arguments, flags, default behavior and error
+  handling.
 
 * If this is a syntax change to a configuration file, define the allowed syntax,
   at least one example per use case, covering defaults and error handling.
@@ -244,13 +245,14 @@ final version of the PEP as well as preventing people from bringing up the same
 rejected idea again in subsequent discussions.
 
 
-#### Open Issues
+#### Open Questions
 
-While a PEP is in draft, ideas can come up which warrant further discussion.
-Those ideas should be recorded so people know that they are being thought about
-but do not have a concrete resolution. This helps make sure all issues required
+While a PEP is in draft, questions can come up which warrant further discussion.
+Those questions should be recorded here so people know that they are being
+thought about but do not have a concrete resolution. This helps make sure all
 for the PEP to be ready for consideration are complete and reduces
-people duplicating prior discussion.
+and reduces people duplicating prior discussion. When possible, link the
+question to where it is being discussed, such as a [forum] post/comment.
 
 
 ### PEP Lifecycle
@@ -267,7 +269,8 @@ This is the happy path, where a PEP is accepted.
 
 1. A pull request for the PEP is submitted with an initial status of
    `provisional` in the preamble. The status is **PROPOSED** while the pull
-   request is unmerged.
+   request is unmerged, and it is not provisionable until the pull request is
+   merged.
 
 1. Reviewer(s) are assigned to the PEP.
 
@@ -347,12 +350,14 @@ These are states that terminate the PEP process:
   For in-progress PEPs, they can be changed to `replaced` immediately. The
   status is now **REPLACED**.
 
+---
+
 
 ## Implementation
 
 When the PEP process is implemented, the contents of the specification section
 will be put into the [CONTRIBUTING.md](/CONTRIBUTING.md) of this repository and
-the Porter repository updated to link to this repository. A PEP template will
+Porter documentation updated to link to the new PEP process. A PEP template will
 be added to `pep/000-PEP-TEMPLATE.md` as well.
 
 
@@ -373,7 +378,7 @@ None.
 None.
 
 
-## Open Issues
+## Open Questions
 
 * How can people filter PEPs by their status?
 
