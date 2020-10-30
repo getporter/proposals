@@ -51,7 +51,7 @@ Enhancement Proposal:
   proposal processes. It's been around for a very long time and provides a great
   template for us to start with. Some changes are necessary due to the
   differences in Porter vs Python. Porter is an implementation, whereas Python
-  is a specification. That is why the Kuberentes and Helm processes were
+  is a specification. That is why the Kubernetes and Helm processes were
   incorporated as well.
 
 * [Kubernetes Enhancement Proposal] - The PEP statuses were based on the KEP
@@ -304,7 +304,7 @@ This is the happy path, where a PEP is accepted.
    The pull request may be closed so the author(s) can go back and iterate on
    the PEP. We should be careful about follow-up pull requests at this stage so
    that a PEP isn't incompletely implemented. Critical changes should be made
-   together so limit follow-ups to unrelated changes that not relevant to the PEP.
+   together to limit follow-ups to unrelated changes that are not relevant to the PEP.
 
 1. After the implementation is merged, the owner submits a pull request to
    change the status to `implemented`.
@@ -331,7 +331,7 @@ These are states that terminate the PEP process:
   status to **WITHDRAWN**.
 
 * When progress on the PEP ceases but we aren't ready to reject it, the PEP can
-  be deferred. For example when people are busy for months and but they would
+  be deferred. For example when people are busy for months but they would
   like to come back to it later or we want to do it but now isn't the right time
   because other things need to be done first. In this case the owner or reviewer
   can submit a pull request changing the status to **DEFERRED**.
