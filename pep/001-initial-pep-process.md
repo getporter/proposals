@@ -76,7 +76,7 @@ rejected already, and that the general idea is going in the right direction.
 
 ### PEP types
 
-* **Feature** proposals are for changes to the Porter codebase, for example
+* **Feature** proposals are for changes to the Porter codebase. For example, 
   changes to the Porter CLI, libraries, configuration, or mixin/plugin
   protocols.
 
@@ -111,7 +111,7 @@ resolution, not the reviewer(s).
 
 #### Reviewer
 
-Maintainer(s) who help getting the PEP to match our proposal requirements, ask
+Maintainer(s) who help get the PEP to match our proposal requirements, ask
 questions, and ensure that the PEP has been properly considered before final
 approval or rejection. The particular maintainers depends on the affected areas,
 scope of change, capacity, etc. At least one reviewer is assigned to coordinate
@@ -141,7 +141,7 @@ required when altering:
 
 In general it isn't necessary for bug fixes, documentation updates, website
 tweaks, routine build upkeep or [meta] project concerns. For example, correcting
-typo in the PEP documentation can be made directly with a pull request, however
+a typo in the PEP documentation can be made directly with a pull request, however
 adding a new requirement to the process would require a new PEP. A maintainer
 may require a PEP when they feel that a change would benefit from the PEP
 process.
@@ -187,7 +187,7 @@ A short (~200 word) description of the technical issue being addressed.
 #### Motivation
 
 It should clearly explain why Porter's existing functionality is inadequate to
-address the problem that the PEP solves and the impacted audience(s) (mixin
+address the problem that the PEP solves and identify the impacted audience(s) (mixin
 developers, bundle authors, end-users). PEP submissions without sufficient
 motivation may be rejected outright. This is the most important part at the
 beginning and is required before moving forward.
@@ -249,13 +249,13 @@ rejected idea again in subsequent discussions.
 While a PEP is in draft, ideas can come up which warrant further discussion.
 Those ideas should be recorded so people know that they are being thought about
 but do not have a concrete resolution. This helps make sure all issues required
-for the PEP to be ready for consideration are complete complete and reduces
+for the PEP to be ready for consideration are complete and reduces
 people duplicating prior discussion.
 
 
 ### PEP Lifecycle
 
-We are using the process from Kubernetes Enhancement Proposal for our status's
+We are using the process from Kubernetes Enhancement Proposal for our statuses
 because they work better for our implementation than Python (Porter isn't a spec
 like python, so Kubernetes process fits us better).
 
