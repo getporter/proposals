@@ -74,12 +74,12 @@ doesn't duplicate or overlap with an exiting proposal, it hasn't been proposed
 and rejected already, and that the general idea is going in the right direction.
 
 
-
 ### PEP types
 
-* **Feature** proposals are for changes to the Porter codebase. For example, 
+* **Feature** proposals are for changes to the Porter codebase. For example,
   changes to the Porter CLI, libraries, configuration, or mixin/plugin
-  protocols.
+  protocols. This also includes changes that _remove_ functionality, such as
+  deprecating an implemented command.
 
 * **Process** proposals are for changes to how the Porter project is run. For
   example, changes to our project governance, build infrastructure and
@@ -166,6 +166,7 @@ Every PEP should have the following sections:
 1. [Security Implications](#security-implications)
 1. [Rejected Ideas](#rejected-ideas)
 1. [Open Questions](#open-questions)
+
 
 #### Preamble
 
@@ -269,7 +270,7 @@ This is the happy path, where a PEP is accepted.
 
 1. A pull request for the PEP is submitted with an initial status of
    `provisional` in the preamble. The status is **PROPOSED** while the pull
-   request is unmerged, and it is not provisionable until the pull request is
+   request is unmerged, and it is not provisional until the pull request is
    merged.
 
 1. Reviewer(s) are assigned to the PEP.
