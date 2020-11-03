@@ -1,7 +1,7 @@
 ---
 title: "Initial Porter Enhancement Proposal Process"
 number: "001"
-status: "proposed"
+status: "provisional"
 owner: "@carolynvs"
 authors:
   - "@carolynvs"
