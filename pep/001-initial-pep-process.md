@@ -262,6 +262,8 @@ We are using the process from Kubernetes Enhancement Proposal for our statuses
 because they work better for our implementation than Python (Porter isn't a spec
 like python, so Kubernetes process fits us better).
 
+![PEP Flowchart](/images/flowchart.png)
+
 This is the happy path, where a PEP is accepted.
 
 1. The idea is posted to the Porter [forum] where the maintainers and community
@@ -317,39 +319,46 @@ This is the happy path, where a PEP is accepted.
    additional work remains, and then merge the pull request. The final state is
    now **IMPLEMENTED**.
 
+#### States
 
-#### End States
+![state diagram](/images/states.png)
 
-These are states that terminate the PEP process:
+* **PROPOSED**: The idea has been submitted to the maintainers.
 
-* A PEP that successfully completes the proposal process is **IMPLEMENTED**.
+* **PROVISIONAL**: The idea has been given a PEP number by the maintainers.
 
-* The PEP may be rejected at certain points by the reviewer. Reviewer should
-  explain the rejection in the active pull request and ultimately close the pull
-  request unmerged. The reviewer submits a pull request updating the status to
-  `rejected` and reiterate the rejection, including enough context that someone
-  can understand it without going back to old pull requests. The status is
-  **REJECTED**.
+* **IMPLEMENTABLE**: The solution has been approved by the maintainers and is
+  ready to implement.
 
-* The owner can withdraw the PEP by submitting a pull request changing the
-  status to **WITHDRAWN**.
+* **IMPLEMENTED**: The solution has been implemented, and the PEP is complete.
 
-* When progress on the PEP ceases but we aren't ready to reject it, the PEP can
-  be deferred. For example when people are busy for months but they would
-  like to come back to it later or we want to do it but now isn't the right time
-  because other things need to be done first. In this case the owner or reviewer
-  can submit a pull request changing the status to **DEFERRED**.
+* **REJECTED**: The proposal has been rejected. The PEP may be rejected at
+  certain points by the reviewer. Reviewer should explain the rejection in the
+  active pull request and ultimately close the pull request unmerged. The
+  reviewer submits a pull request updating the status to `rejected` and
+  reiterate the rejection, including enough context that someone can understand
+  it without going back to old pull requests.
+
+* **WITHDRAWN**: The proposal has been withdrawn. The owner should submit a pull
+  request changing the status to `withdrawn`. This is a terminal state.
+
+* **DEFFERED**: The proposal is not being actively worked on. When progress on
+  the PEP ceases but we aren't ready to reject it, the PEP can be deferred. For
+  example when people are busy for months but they would like to come back to it
+  later or we want to do it but now isn't the right time because other things
+  need to be done first. In this case the owner or reviewer can submit a pull
+  request changing the status to `deferred`.
 
   When people are ready to work on it again, the owner should submit a pull
   request changing the status back to an appropriate state to continue, such as
   `provisional` or `implementable`.
 
-* Once a PEP has been merged, and a new PEP is started to replace it, or
-  supersede it, a pull request should be opened changing the status to
-  `replaced` and include a link to the new PEP. If the original PEP was
-  implemented, wait to update it to `replaced` until the new PEP is implemented.
-  For in-progress PEPs, they can be changed to `replaced` immediately. The
-  status is now **REPLACED**.
+* **REPLACED**: The PEP has been replaced by another PEP. Once a PEP has been
+  merged, and a new PEP is started to replace it, or supersede it, a pull
+  request should be opened changing the status to `replaced` and include a link
+  to the new PEP. If the original PEP was implemented, wait to update it to
+  `replaced` until the new PEP is implemented. For in-progress PEPs, they can be
+  changed to `replaced` immediately.
 
 ---
 
