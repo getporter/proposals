@@ -336,7 +336,7 @@ This is the happy path, where a PEP is accepted.
   certain points by the reviewer. Reviewer should explain the rejection in the
   active pull request and ultimately close the pull request unmerged. The
   reviewer submits a pull request updating the status to `rejected` and
-  reiterate the rejection, including enough context that someone can understand
+  reiterates the rejection, including enough context that someone can understand
   it without going back to old pull requests.
 
 * **WITHDRAWN**: The proposal has been withdrawn. The owner should submit a pull
