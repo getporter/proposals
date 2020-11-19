@@ -7,3 +7,4 @@ opportunity to influence Porter's direction.
 
 * [See all proposals](/pep/)
 * [How to make a proposal](CONTRIBUTING.md)
+* [PEP Template](/pep/000-PEP-TEMPLATE.md)
