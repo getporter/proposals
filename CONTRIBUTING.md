@@ -1,71 +1,4 @@
----
-title: "Initial Porter Enhancement Proposal Process"
-number: "001"
-status: "implementable"
-owner: "@carolynvs"
-authors:
-  - "@carolynvs"
-created: "2020-10-29"
-type: "process"
----
-
-## Abstract
-
-Let's define a process to propose and evaluate changes to the Porter project.
-The Porter Enhancement Proposal (PEP) process is based on the [Python
-Enhancement Proposal] with some parts also borrowed from Helm and Kubernetes. A
-PEP is a document that explains why a change is desirable and proposes how to
-implement it.
-
-
-## Motivation
-
-Adopting a proposal process will improve how proposals are handled and increase
-transparency with the community. Right now, people make proposals either in an
-issue or on our forum or slack messages, etc, we hash it out there, sometimes
-making a new issue to track the final set of work, and then start on it.
-
-The hodgepodge nature of our informal process makes it difficult to engage in
-these discussions, and give people a reasonable turnabout time on feedback. It
-takes a while to read through them, understand the use cases, potential impact
-of the change, understand if there are gaps or unintended consequences, etc and
-that usually ends up looking like no response from maintainers for too long. Not
-to mention that it's difficult to track and keep on top of suggestions when they
-are scattered everywhere. A formal process for proposals would set expectations
-for both contributors and maintainers, allowing maintainers to quickly weigh in
-on “Is this worth pursuing” without implicitly giving people the false
-impression that they have performed all of the above due diligence and that it’s
-approved or ready to start on.
-
-By defining a process and identifying what due diligence needs to happen before
-a proposal can be considered and approved, it would help us make changes more
-safely, and collaborate on a design with the interested community members.
-
-
-## Rationale
-
-Three proposal processes were considered and used to create the proposed Porter
-Enhancement Proposal:
-
-* [Python Enhancement Proposal] - This is the foundation of the other two
-  proposal processes. It's been around for a very long time and provides a great
-  template for us to start with. Some changes are necessary due to the
-  differences in Porter vs Python. Porter is an implementation, whereas Python
-  is a specification. That is why the Kubernetes and Helm processes were
-  incorporated as well.
-
-* [Kubernetes Enhancement Proposal] - The PEP statuses were based on the KEP
-  process since it is a better fit to say a PEP is "implementable" and
-  "implemented" vs. having people write a reference implementation of a spec
-  (which only makes sense for Python).
-
-* [Helm Improvement Proposal] - Helm uses HIPs to track not just code
-  enhancements, but they also use it to track suggestions to their governance
-  model and advisory documentation. The "type" field in the preamble comes from
-  Helm.
-
-
-## Specification
+# Porter Enhancement Proposal (PEP) Process
 
 Before creating a PEP, discuss the idea first with the maintainers on our
 [forum] and validate that the idea is suitable and welcome. This is to make sure
@@ -73,8 +6,9 @@ someone doesn't waste time writing a PEP when a solution already exists, it
 doesn't duplicate or overlap with an exiting proposal, it hasn't been proposed
 and rejected already, and that the general idea is going in the right direction.
 
+<p align="center"><a href="pep/000-PEP-TEMPLATE.md">PEP Template</a></p>
 
-### PEP types
+## PEP types
 
 * **Feature** proposals are for changes to the Porter codebase. For example,
   changes to the Porter CLI, libraries, configuration, or mixin/plugin
@@ -86,7 +20,7 @@ and rejected already, and that the general idea is going in the right direction.
   processes, etc.
 
 
-### PEP Roles
+## PEP Roles
 
 * [Author](#author)
 * [Owner](#owner)
@@ -94,12 +28,12 @@ and rejected already, and that the general idea is going in the right direction.
 * [Commenter](#commenter)
 
 
-#### Author
+### Author
 
 Contributors writing the PEP and implementation. This can be a group effort. 💪
 
 
-#### Owner
+### Owner
 
 Single author who is responsible for moving the PEP forward, collecting
 feedback, and gaining consensus with the community. They submit pull requests to
@@ -110,7 +44,7 @@ It is the owner's responsibility to follow the PEP process and work towards a
 resolution, not the reviewer(s).
 
 
-#### Reviewer
+### Reviewer
 
 Maintainer(s) who help get the PEP to match our proposal requirements, ask
 questions, and ensure that the PEP has been properly considered before final
@@ -119,13 +53,13 @@ scope of change, capacity, etc. At least one reviewer is assigned to coordinate
 with the Owner as the PEP moves through the process.
 
 
-#### Commenter
+### Commenter
 
 Community members are welcome to join in on the discussion. Commenters may ask
 clarifying questions, provide additional use cases, identify edge cases, etc.
 
 
-### When is a PEP required?
+## When is a PEP required?
 
 A PEP is helpful when we need to have an agreed upon design, analysis of
 risk/scope, or evaluation of user experience up-front. Based on that a PEP is
@@ -148,7 +82,7 @@ may require a PEP when they feel that a change would benefit from the PEP
 process.
 
 
-### PEP Contents
+## PEP Contents
 
 Proposals are stored in this repository in the [pep](/pep/) directory. They
 should be named `NNN-title.md` where `NNN` is the PEP number and `title` is the
@@ -168,7 +102,7 @@ Every PEP should have the following sections:
 1. [Open Questions](#open-questions)
 
 
-#### Preamble
+### Preamble
 
 Metadata about the PEP, including:
 
@@ -181,12 +115,12 @@ Metadata about the PEP, including:
 * The date the PEP was created
 
 
-#### Abstract
+### Abstract
 
 A short (~200 word) description of the technical issue being addressed.
 
 
-#### Motivation
+### Motivation
 
 It should clearly explain why Porter's existing functionality is inadequate to
 address the problem that the PEP solves and identify the impacted audience(s) (mixin
@@ -195,17 +129,16 @@ motivation may be rejected outright. This is the most important part at the
 beginning and is required before moving forward.
 
 
-#### Rationale
+### Rationale
 
 The rationale fleshes out the specification by describing why particular design
-decisions were made. It should describe alternate designs that were considered
+decisions were made.  It should describe alternate designs that were considered
 and related work.
 
-The rationale should provide evidence of consensus within the community and
-discuss important objections or concerns raised during discussion.
+The rationale should provide evidence of consensus within the community and discuss important objections or concerns raised during discussion.
 
 
-#### Specification
+### Specification
 
 The technical specification should describe the command and/or configuration
 syntax and semantics of any new feature.
@@ -223,7 +156,7 @@ syntax and semantics of any new feature.
   change fits into Porter workflows and tasks.
 
 
-#### Backwards Compatibility
+### Backwards Compatibility
 
 All PEPs that introduce backwards incompatibilities must include a section
 describing these incompatibilities and their severity.  The PEP must explain how
@@ -232,13 +165,13 @@ PEP submissions without a sufficient backwards compatibility treatise may be
 rejected outright.
 
 
-#### Security Implications
+### Security Implications
 
 If there are security concerns in relation to the PEP, those concerns should be
 explicitly written out to make sure reviewers of the PEP are aware of them.
-Mitigations should be included if possible.
 
-#### Rejected Ideas
+
+### Rejected Ideas
 
 Throughout the discussion of a PEP, various ideas will be proposed which are not
 accepted. Those rejected ideas should be recorded along with the reasoning as to
@@ -247,9 +180,9 @@ final version of the PEP as well as preventing people from bringing up the same
 rejected idea again in subsequent discussions.
 
 
-#### Open Questions
+### Open Questions
 
-Before a PEP is implemented, questions can come up which warrant further discussion.
+While a PEP is in draft, questions can come up which warrant further discussion.
 Those questions should be recorded here so people know that they are being
 thought about but do not have a concrete resolution. This helps make sure all
 for the PEP to be ready for consideration are complete and reduces
@@ -257,7 +190,7 @@ and reduces people duplicating prior discussion. When possible, link the
 question to where it is being discussed, such as a [forum] post/comment.
 
 
-### PEP Lifecycle
+## PEP Lifecycle
 
 We are using the process from Kubernetes Enhancement Proposal for our statuses
 because they work better for our implementation than Python (Porter isn't a spec
@@ -320,7 +253,7 @@ This is the happy path, where a PEP is accepted.
    additional work remains, and then merge the pull request. The final state is
    now **IMPLEMENTED**.
 
-#### States
+### States
 
 ![state diagram](/images/states.png)
 
@@ -361,42 +294,7 @@ This is the happy path, where a PEP is accepted.
   `replaced` until the new PEP is implemented. For in-progress PEPs, they can be
   changed to `replaced` immediately.
 
----
 
-
-## Implementation
-
-When the PEP process is implemented, the contents of the specification section
-will be put into the [CONTRIBUTING.md](/CONTRIBUTING.md) of this repository and
-Porter documentation updated to link to the new PEP process. A PEP template will
-be added to [pep/000-PEP-TEMPLATE.md](/pep/000-PEP-TEMPLATE.md) as well.
-
-
-## Backwards Compatibility
-
-We currently do not have a formal process, but most of these due diligence
-activities are based on what maintainers have been doing behind-the-scenes
-today. So backwards compatibility is not a concern.
-
-
-## Security Implications
-
-None.
-
-
-## Rejected Ideas
-
-None.
-
-
-## Open Questions
-
-* How can people filter PEPs by their status?
-
-
-[Python Enhancement Proposal]: https://github.com/python/peps/blob/master/pep-0001.txt
-[Helm Improvement Proposal]: https://github.com/helm/community/blob/master/hips/hip-0001.md
-[Kubernetes Enhancement Proposal]: https://github.com/kubernetes/enhancements/blob/master/keps/0001-kubernetes-enhancement-proposal-process.md
 [meta]: https://github.com/getporter/porter/labels/meta
-[forum]: https://porter.sh/forum
-[mailing list]: https://porter.sh/mailing-list
+[forum]: https://porter.sh/forum/
+[mailing list]: https://porter.sh/mailing-list/
