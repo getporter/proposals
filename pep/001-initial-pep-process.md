@@ -251,10 +251,10 @@ rejected idea again in subsequent discussions.
 
 Before a PEP is implemented, questions can come up which warrant further discussion.
 Those questions should be recorded here so people know that they are being
-thought about but do not have a concrete resolution. This helps make sure all
-for the PEP to be ready for consideration are complete and reduces
-and reduces people duplicating prior discussion. When possible, link the
-question to where it is being discussed, such as a [forum] post/comment.
+thought about but do not have a concrete resolution. This ensures all concerns
+are addressed prior to accepting the PEP and reduces repeating prior discussion.
+When possible, link the question to where it is being discussed, such as a
+[forum] post/comment.
 
 
 ### PEP Lifecycle
