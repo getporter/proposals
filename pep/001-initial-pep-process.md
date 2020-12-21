@@ -1,7 +1,7 @@
 ---
 title: "Initial Porter Enhancement Proposal Process"
 number: "001"
-status: "implementable"
+status: "implemented"
 owner: "@carolynvs"
 authors:
   - "@carolynvs"
