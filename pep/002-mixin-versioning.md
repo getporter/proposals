@@ -23,8 +23,8 @@ They must manually install each mixin using homegrown scripts.
 Unfortunately the mixin cache is stored in PORTER_HOME, it is impossible to work on bundles that use different versions of the same mixin.
 Porter really needs to manage the mixin cache and appropriately communicating with the correct mixin version targeted by the bundle.
 
-* Mixin authors are impacted by this change because they will need to adjust their mixin declaration schema to allow for declaring the mixin version.
-* Bundle authors are impacted by the new syntax for declaring mixins and no longer managing the bundle cache by hand.
+* Mixin authors need to adjust their mixin declaration schema to allow for declaring the mixin version and release a new version of their mixin(s) supporting this proposal.
+* Bundle authors should start defining the mixin version when they declare mixins in porter.yaml. If they have extra scripts that they were running before `porter build` to ensure the right versions are in the global mixin cache, that is no longer necessary.
 * End users will now be able to see the exact version of the mixins used by a bundle.
 
 
@@ -72,6 +72,9 @@ Its purpose is to prevent repeatedly re-downloading mixins, which speeds up buil
 
 While the global mixin cache can be helpful for reproducible builds, for example in case a version is no longer accessible publicly, it is the responsibility of the user to ensure that by backing up the cache to a remote location and copying it locally back into the global mixin cache before building bundles.
 Global cache management and reproducible builds are out-of-scope of this specification.
+
+In CI systems, people are encouraged to preserve the global mixin cache to improve build times and limit bandwidth usage.
+
 
 #### Bundle Mixin Cache
 
@@ -235,19 +238,19 @@ Porter manages injecting the properties for `mixin -> version|source` when it as
 
 ### Mixin Resolution
 
-A new command, `porter mixins download`, downloads the mixins used by the bundle the local bundle mixin cache directory.
+A new command, `porter mixins download`, downloads the mixins used by the bundle to the local bundle mixin cache directory.
 
 ```
-$ porter mixins download
+$ porter mixins download [--global=false]
 ```
 
 1. Resolve the sources and versions of the mixins used by the bundle.
   If porter.lock.yaml exists, then any existing locked versions are used when the mixin name and source matches.
-1. Identify if any required mixins are not in the cache and then download them.
+1. Identify if any required mixins are not in the global mixin cache, and then download them.
 1. Copies the mixins into the local bundle cache using symbolic links to minimize storage requirements.
 1. Updates the lock file with any newly resolved mixins.
 
-In CI systems, people are encouraged to cache PORTER_HOME/.porter/mixins to improve build times and limit bandwidth usage.
+Eventually people may want a command that allows pre-populating the global cache from a list of mixin sources.  However global cache management is out-of-scope of this proposal. If there is enough interest, we should follow-up with a proposal for general cache management (preventing cache size creep, warming up the cache, etc).
 
 
 ### Build
