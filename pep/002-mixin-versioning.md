@@ -1,6 +1,6 @@
 ---
 title: "Mixin Versioning"
-number: "NNN"
+number: "002"
 status: "provisional"
 owner: "@carolynvs"
 authors:
@@ -283,7 +283,8 @@ Information about the mixins used in the bundle should be extended to include no
 }
 ```
 
-The manifest hash should be extended to include the lockfile as well so that builds are triggered properly when a mixin is updated.
+* The manifest hash should be extended to include the lockfile as well so that builds are triggered properly when a mixin is updated.
+* At runtime, before the bundle steps are executed Porter should check the digests on bundle.json against the mixin runtime binaries in the invocation image and fail if they don't match.
 
 
 ### Verification
@@ -291,7 +292,7 @@ The manifest hash should be extended to include the lockfile as well so that bui
 An end-user should be able to see which mixins are used by a bundle, where they came from and the version used.
 
 ```
-$ porter explain --reference getporter/porter-hello:v0.1.0
+$ porter inspect --reference getporter/porter-hello:v0.1.0
 Name: porter-hello
 Version: v0.1.0
 ...
@@ -301,7 +302,8 @@ Mixins:
     exec    v0.33.1     https://cdn.porter.sh/mixins/arm
 ```
 
-In the json output format, all available information about the mixins from the bundle.json custom metadata section should be returned.
+* In the json output format, all available information about the mixins from the bundle.json custom metadata section should be returned.
+* The mixin data should be returned by inspect because that command is intended for checking that a bundle is legit and see what it is using. Explain is for understanding how to execute the bundle, i.e. what parameters can I pass, etc.
 
 
 ## Implementation
