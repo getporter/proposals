@@ -193,7 +193,7 @@ It is essentially reserved for custom tools and future use in Porter.
 
 #### Output Labels
 
-The spec allows for labels to be set on a result however we will not expose that in Porter.
+The spec allows for labels to be set on an output however we will not expose that in Porter.
 It is essentially reserved for custom tools and future use in Porter.
 Because outputs are not represented as a structure document, labels applied to an output are stored in the result's output metadata.
 
