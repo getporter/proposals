@@ -116,7 +116,7 @@ Later when the installation is upgraded to a newer version of the bundle that de
 
 Labels can be applied to an installation when the bundle is installed:
 ```
-porter install wordpress --reference getporter/wordpress:v1.0 --label-installation owner=carolyn
+porter install wordpress --reference getporter/wordpress:v1.0 --label-installation owner=carolynvs
 ```
 
 Labels can be applied after an installation is created using the `porter installation label` command:
@@ -137,9 +137,9 @@ $ porter installation label delete wordpress --label env
   "bundleRepository": "getporter/wordpress",
   "version": "0.1.0",
   "labels": {
+    "owner": "carolynvs",
     "cnab.io/app": "wordpress",
-    "cnab.io/appVersion": "v1.2.3",
-    "owner": "carolyn"
+    "cnab.io/appVersion": "v1.2.3"
   },
   "custom": {}
 }
@@ -160,7 +160,7 @@ Labels can be applied to the claim with the `--label` flag.
 For example, the Porter Operator could set `--label cnab.io/executor=porter-operator` when it executes a bundle, allowing us to see in the history if an action was executed manually or via the operator.
 
 ```
-porter install wordpress --reference getporter/wordpress:v1.0 --label owner=carolyn
+porter install wordpress --reference getporter/wordpress:v1.0 --label porter.sh/client=porter-operator --label porter.sh/clientVersion v0.3.0
 ```
 
 **claim**
@@ -170,10 +170,19 @@ porter install wordpress --reference getporter/wordpress:v1.0 --label owner=caro
   "installation": "wordpress",
   "action": "install",
   "labels": {
-    "owner": "carolyn"
+    "cnab.io/executor": "porter",
+    "cnab.io/executorVersion": "v0.36.0",
+    "porter.sh/client": "porter-operator",
+    "porter.sh/clientVersion": "v0.3.0",
+    "porter.sh/porterRuntimeVersion": "v0.33.0"
   }
 }
 ```
+
+Porter should always set the `cnab.io/executor` label to "porter" and `cnab.io/executorVersion` label to the current version of the Porter client, using `porter.sh/porterRuntimeVersion` to record the version of Porter that was embedded in the bundle (if available).
+When the Porter Operator executes an installation, it should set `porter.sh/client` to "porter-operator", and `porter.sh/clientVersion` to the version of the Porter Operator. By default when these labels are not already provided, the Porter CLI should set `porter.sh/client` and `porter.sh/clientVersion` to the same values it uses for the executor labels.
+
+Knowing which version of Porter was used to execute each part of the bundle (client/runtime) will help us debug and troubleshoot problems with bundles in production.
 
 #### Result Labels
 
@@ -182,20 +191,31 @@ It is essentially reserved for custom tools and future use in Porter.
 
 #### Output Labels
 
-The spec allows for labels to be set on an output however we will not expose that in Porter.
-It is essentially reserved for custom tools and future use in Porter.
-Because outputs are not represented as a structure document, labels applied to an output are stored in the result's output metadata.
+The [CNAB Installation State Specification] adds labels to the output definition in a bundle.
+When an output is generated, labels defined on the output are added to the output metadata on the claim result.
+
+**bundle.json**
+```
+"outputs":{
+  "clientCert":{
+    "definition":"x509Certificate",
+    "path":"/cnab/app/outputs/clientCert",
+    "labels": {
+      "format": "PEM"
+    }
+  },
+```
 
 **result**
 ```json
 {
   "id": "RESULT_ID",
   "outputs": {
-    "OUTPUT_NAME": {
+    "clientCert": {
       "contentDigest": "abc123",
       "generatedByBundle": "true",
       "labels": {
-        "foo": "bar"
+        "format": "PEM"
       }
     }
   }
