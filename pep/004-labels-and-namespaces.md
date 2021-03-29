@@ -235,7 +235,6 @@ Below is the representation of labels in a credential/parameter set.
   "labels": {
     "env": "dev"
   }
-  // ... definition for the credential or parameter set
 }
 ```
 
@@ -293,7 +292,7 @@ $ porter installation show INSTALLATION [--namespace|-n NAMESPACE]
 
 An installation's namespace cannot be changed once set.
 
-**installation document**
+**installation**
 
 ```json
 {
@@ -306,12 +305,17 @@ An installation's namespace cannot be changed once set.
 ```
 
 The list command always applies the --namespace flag, even when not set.
+When --namespaces is set to `*`, installations in all namespaces are returned.
+
 ```console
 $ porter list
 # displays only global installations
 
 $ porter list --namespace carolyn
 # displays installations in the carolyn namespace
+
+$ porter list --namespace *
+# displays all installations across namespaces
 ```
 
 #### Claim Namespace
@@ -353,6 +357,9 @@ $ porter credentials list
 
 $ porter parameters list --namespace carolyn
 # Displays parameters in the carolyn namespace
+
+$ porter credentials list --namespace *
+# Displays all credentials across namespaces
 
 $ porter credentials show NAME [--namespace|-n NAMESPACE]
 # Show the credential set matching the name and namespace
