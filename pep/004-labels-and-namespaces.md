@@ -17,13 +17,13 @@ We need a way to organize and isolate installations in an environment with multi
 ## Motivation
 
 When multiple people are working with the same installations and Porter data, it becomes easy to "collide" and step on each other's toes.
-For example, two people want to install the same application and the first people gets the preferred installation name.
-Or when there is a team of people creating installations, credentials, etc in an environment it is hard to keep track of which is used for what and who owns what.
+For example, two people want to install the same application and the first person gets the preferred installation name.
+Or when there is a team of people running bundles in an environment, it is hard to keep track of which is used for what and who owns what.
 
 
 ## Rationale
 
-This is already a solved problem in Kubernetes where they use labels and namespaces to organize and isolate data.
+This is already a solved problem in Kubernetes, where they use labels and namespaces to organize and isolate data.
 
 
 ## Specification
@@ -35,7 +35,8 @@ Labels can be used to indicate lightweight ownership, environment, and purpose.
 
 ```
 owner=carolynvs
-app=myApp
+cnab.io/app=myApp
+cnab.io/appVersion=v1.2.3
 env=dev
 ```
 
@@ -66,6 +67,9 @@ The following documents support labels:
 * [Outputs](#output-labels)
 * [Credential and Parameter Sets](#credential-and-parameter-set-labels)
 
+I have proposed supporting labels officially in 
+[CNAB Installation State Specification], which would cover both storing the labels and govern their format.
+
 [Kubernetes labels]: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set
 
 #### Bundle Labels
@@ -77,14 +81,15 @@ name: mybun
 version: v0.1.0
 
 labels:
-  app: myapp
-  io.cnab/appVersion: v1.2.3
+  cnab.io/app: myapp
+  cnab.io/appVersion: v1.2.3
   internal: "true"
 ```
 
-I am [proposing labels to the CNAB Spec][cnab-labels-proposal] as a first class value on the bundle, reserving the `io.cnab/` prefix, and defining common labels that tools can use to filter bundles:
+The [CNAB Installation State Specification] proposes as a first class value on the bundle, reserving the `cnab.io/` prefix, and defining common labels that tools can use to filter bundles:
 
-* io.cnab/appVersion - The version of the application installed by the bundle.
+* cnab.io/app - The name of the application installed by the bundle.
+* cnab.io/appVersion - The version of the application installed by the bundle.
 
 If accepted labels would be stored in the bundle.json like so:
 
@@ -93,27 +98,28 @@ If accepted labels would be stored in the bundle.json like so:
   "name": "mybun",
   "version": "v0.1.0",
   "labels": {
-    "app": "myapp",
-    "io.cnab/appVersion": "v1.2.3",
+    "cnab.io/app": "myapp",
+    "cnab.io/appVersion": "v1.2.3",
     "internal": "true"
   }
 }
 ```
 
-[cnab-labels-proposal]: https://github.com/cnabio/cnab-spec/pull/409
-
 #### Installation Labels
 
-When a bundle is installed, the labels defined on the bundle are copied and used as labels on the installation.
-Users can apply additional labels using the --label flag, which can be repeated, has a short flag of `-l` and uses the following format: KEY=VALUE.
+When a bundle is executed, the labels defined on the bundle are copied and used as labels on the installation.
+Users can apply additional labels using the `--label-installation` flag, which can be repeated, and uses the following format: KEY=VALUE.
+
+Let's consider a bundle that deploys v1.2.3 of myApp.
+The bundle has two labels defined, `cnab.io/app=myApp` and `cnab.io/appVersion=v1.2.3`, and when the bundle is installed, those labels are applied to the installation.
+Later when the installation is upgraded to a newer version of the bundle that deploys myApp v1.2.4, the labels on the bundle are again applied to the installation, updating the `cnab.io/appVersion` label to `v1.2.4`.
 
 Labels can be applied to an installation when the bundle is installed:
 ```
-porter install wordpress --reference getporter/wordpress:v1.0 --label owner=carolyn
+porter install wordpress --reference getporter/wordpress:v1.0 --label-installation owner=carolyn
 ```
 
 Labels can be applied after an installation is created using the `porter installation label` command:
-
 ```
 $ porter installation label set wordpress --label env=dev --label internal=true
 # add (or updates) env=dev and internal=true to the wordpress installation
@@ -122,7 +128,7 @@ $ porter installation label delete wordpress --label env
 # Remove the env label from the wordpress installation
 ```
 
-🚨 The CNAB Spec does not cover storing installation data, and we should push for having a document representation of installations be added to the spec.
+🚨 The CNAB Spec does not yet cover storing installation data, so I have proposed adding a [CNAB Installation State Specification] that can store additional metadata associated with the installation.
 
 ```json
 {
@@ -131,8 +137,8 @@ $ porter installation label delete wordpress --label env
   "bundleRepository": "getporter/wordpress",
   "version": "0.1.0",
   "labels": {
-    "app": "wordpress",
-    "io.cnab/appVersion": "v1.2.3",
+    "cnab.io/app": "wordpress",
+    "cnab.io/appVersion": "v1.2.3",
     "owner": "carolyn"
   },
   "custom": {}
@@ -150,7 +156,8 @@ $ porter installations list --label owner=carolyn
 
 In Porter a claim is represented as a "run".
 Each time porter install/upgrade/invoke/uninstall is executed, that generates a claim (except when the action is stateless such as io.cnab.status).
-The user-defined labels provided when the bundle is installed are applied to both the installation and the claim.
+Labels can be applied to the claim with the `--label` flag.
+For example, the Porter Operator could set `--label cnab.io/executor=porter-operator` when it executes a bundle, allowing us to see in the history if an action was executed manually or via the operator.
 
 ```
 porter install wordpress --reference getporter/wordpress:v1.0 --label owner=carolyn
@@ -164,24 +171,6 @@ porter install wordpress --reference getporter/wordpress:v1.0 --label owner=caro
   "action": "install",
   "labels": {
     "owner": "carolyn"
-  }
-}
-```
-
-During upgrade, invoke and uninstall the user-defined labels are applied to the claim only:
-
-```
-porter upgrade wordpress --label carolyn-test=true
-```
-
-**claim**
-```json
-{
-  "id": "CLAIM_ID",
-  "installation": "wordpress",
-  "action": "upgrade",
-  "labels": {
-    "carolyn-test": "true"
   }
 }
 ```
@@ -265,6 +254,9 @@ The following documents support namespaces:
 * [Claims](#claim-namespace)
 * [Results](#result-namespace)
 * [Credential and Parameter Sets](#credential-and-parameter-set-namespace)
+
+I have proposed supporting namespaces officially in 
+[CNAB Installation State Specification], which would cover both storing the namespace and govern its format.
 
 #### Installation Namespace
 
@@ -384,3 +376,5 @@ None
 ## Open Questions
 
 None
+
+[CNAB Installation State Specification]: https://github.com/cnabio/cnab-spec/pull/411
