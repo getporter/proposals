@@ -105,6 +105,42 @@ If accepted labels would be stored in the bundle.json like so:
 }
 ```
 
+You can see the labels applied to a bundle:
+
+```console
+$ porter explain --reference getporter/wordpress:v0.1.0
+Name: wordpress
+Description: Install the wordpress blog
+Version: 0.1.0
+
+Labels:
+----------------------------------------
+  Key                    Value
+----------------------------------------
+  cnab.io/app            wordpress
+  cnab.io/appVersion     v5.7.3
+
+Credentials:
+Name         Description   Required
+kubeconfig                 true
+
+Parameters:
+Name                 Description      Type      Default               Required   Applies To
+namespace                             string                          false      All Actions
+wordpress-name                        string    porter-ci-wordpress   false      All Actions
+wordpress-password                    string    <nil>                 true       All Actions
+
+No outputs defined
+
+Actions:
+Name   Description   Modifies Installation   Stateless
+ping   ping          true                    false
+
+Dependencies:
+Alias   Reference
+mysql   getporter/mysql:v0.1.0
+```
+
 #### Installation Labels
 
 When a bundle is executed, the labels defined on the bundle are copied and used as labels on the installation.
@@ -150,6 +186,36 @@ Users can filter by labels when listing installations:
 ```console
 $ porter installations list --label owner=carolyn
 # Filter installations by the label owner=carolyn
+```
+
+Users can view labels applied to an installation:
+
+```console
+$ porter show myBlog --namespace carolynvs
+Name: myBlog
+Namespace: carolynvs
+Created: 11 hours ago
+Modified: 10 hours ago
+
+Labels:
+----------------------------------------
+  Key                    Value
+----------------------------------------
+  cnab.io/app            wordpress
+  cnab.io/appVersion     v5.7.3
+ 
+Outputs:
+-------------------------------------------------------------------------------
+  Name                                 Type    Value
+-------------------------------------------------------------------------------
+  io.cnab.outputs.invocationImageLogs  string  executing install action from
+                                               hbs (installation: hbs) Ins...
+
+History:
+--------------------------------------------------------------------------
+  Run ID                      Action   Timestamp     Status     Has Logs
+--------------------------------------------------------------------------
+  01F20DM6AJ4JHSEA0SPPSQAZVY  install  11 hours ago  succeeded   true
 ```
 
 #### Claim Labels
@@ -260,6 +326,28 @@ They can also be filtered by label when listing:
 $ porter credentials list --label env=prod
 
 $ porter parameters list --label env=prod
+```
+
+Users can view the labels on a parameter or credential set:
+
+```console
+$ porter credentials show myBlog --namespace carolynvs
+Name: myBlog
+Namespace: carolynvs
+Created: 6 seconds ago
+Modified: 6 seconds ago
+
+Labels:
+----------------------------------------
+  Key            Value
+----------------------------------------
+  env            dev
+
+Mappings:
+----------------------------------------------------------
+  Name        Local Source                   Source Type
+----------------------------------------------------------
+  kubeconfig  /Users/carolynvs/.kube/config  path
 ```
 
 ### Namespaces
