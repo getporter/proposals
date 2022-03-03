@@ -112,7 +112,9 @@ ___
 
 ## Specification
 
-The heart of the solution for all of the above use cases is reducing them to a single decision: "GetOrCreate". The bundle declares a set of match criteria that is used to identify an existing installation that satisfies the dependency. If one cannot be resolved, then a new installation is created.
+The heart of the solution for all of the above use cases is reducing them to a single decision: "GetOrCreate".
+The bundle declares a set of criteria that is used to identify an existing installation that satisfies the dependency.
+If one cannot be resolved, then a new installation is created.
 
 ### porter.yaml
 
@@ -130,7 +132,7 @@ dependencies:
         reference: FULL_BUNDLE_REFERENCE
         # Criteria for the bundle version used
         # Use vX.Y.Z-0 to allow prerelease versions to be resolved by Porter
-        version: SEMVER_RANGES # See https://github.com/Masterminds/semver (v3 format)
+        version: SEMVER_RANGE # See https://github.com/Masterminds/semver (v3 format)
         # An interface defining how the dependency will be used by this bundle
         # Porter always infers a base interface based on how the dependency is used in porter.yaml
         interface:
@@ -191,9 +193,7 @@ dependencies:
         reference: getporter/redis:v1.0.2
       installation: 
         labels:
-          installation: ${ installation.name }
-        criteria:
-          matchNamespace: true
+          installation: "{{ installation.name }}"
 ```
 
 
@@ -354,13 +354,13 @@ When a bundle applies the identifier, it allows a consuming bundle that would de
 ```yaml
 credentials:
   - name: admin-kubeconfig
-    $id: "io.kubernetes.config.cluster-admin"
+    $id: "porter.sh/interfaces/kubernetes.config.cluster-admin"
 ```
 
 When wiring up the bundle, Porter uses the identifier to map from the name item in the dependency to how it is used in the consuming bundle.
 This allows a bundle to refer to the output connection string as "connstr", while some bundles defined the output as "connection-string" and others as "dbConn", etc.
 
-Either Porter or the CNAB spec can help maintain a set of well-known identifiers and explain what it represents so that other authors can use them.
+Porter can help maintain a set of well-known identifiers and explain what it represents so that other authors can use them.
 Bundle authors who are interested in having the widest base possible of users will be motivated to apply the identifier so that their bundle can be used across platforms.
 
 ### Wiring Dependencies
@@ -381,8 +381,7 @@ dependencies:
       bundle:
         reference: getporter/redis:v1.0.0
       credentials:
-        kubeconfig:
-          credential: kubeconfig
+        kubeconfig: bundle.credentials.kubeconfig # Note that this isn't a template variable though it uses the same syntax
 ```
 
 The mysql dependency's connection-string output is passed to the myapp dependency's connstr parameter.
@@ -395,9 +394,7 @@ dependencies:
       bundle:
         reference: getporter/myapp:v1.0.0
       parameters:
-        connstr:
-          dependency: mysql
-          output: connection-string
+        connstr: bundle.dependencies.mysql.outputs.connection-string
     - name: mysql
       bundle:
         reference: getporter/mysql:v5.7.13
@@ -405,9 +402,6 @@ dependencies:
 
 * An output of a dependency can be passed to a credential of another dependency.
 * An output of a dependency be used as the output value of the parent bundle's output.
-
-
-
 
 ### Dependency Resolution
 
@@ -445,6 +439,8 @@ implemented link to the pull request(s) here.
 The changes proposed here are not backwards compatible with the existing dependencies feature in v0.38.
 When this feature is released, the changes to porter.yaml will require a major version increase.
 We are not targeting this change for the v1.0.0 milestone.
+In addition, when we save the dependencies metadata to bundle.json, it will need to use a new custom extension name, such as `io.cnab.dependencies@v2`.
+The exact extension name is TBD and will be decided in the CNAB spec.
 
 ___
 
@@ -481,10 +477,4 @@ In this case, the user can install the dependency independently, installing the 
 Q. The current format uses an array to create an explicit ordering of the dependencies.
 Now that Porter resolves its own ordering, should we stick with the array to be consistent with how we define other things, like parameters, or should we use a map to reinforce that the ordering is not based on the order of the dependencies in the array?
 
-### Why can't we use template syntax when wiring dependencies?
-
-Q. Can we use the template syntax bundle.dependencies.NAME when wiring inputs and outputs between dependencies?
-
-A. No, we will use a similar source syntax that is used for wiring parameters.
-The source of a dependency parameter or credential must be determined at build time, and have a single source.
-With template syntax, users would be confused by not being allowed to compose a value, such as "localhost:${bundle.dependencies.service.outputs.port}" which cannot be evaluated at build time.
+A. For consistency and better autocomplete experience, we will stick with an array.
