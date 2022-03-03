@@ -14,26 +14,21 @@ type: "feature"
 * [Motivation](#motivation)
   * [Use Case: Exclusive Resource](#use-case-exclusive-resource)
   * [Use Case: Global Resource](#use-case-global-resource)
-  * [Use Case: Scoped Resource](#use-case-scoped-resource)
+  * [Use Case: Application Resource](#use-case-application-resource)
   * [Use Case: User Provided Resource](#use-case-user-provided-resource)
   * [Use Case: Polymorphic Resource](#use-case-polymorphic-resource)
 * [Rationale](#rationale)
 * [Specification](#specification)
+  * [porter.yaml](#porter-yaml)
+  * [Bundle Interfaces](#bundle-interfaces)
+  * [Wiring Dependencies](#wiring-dependencies)
+  * [Dependency Resolution](#dependency-resolution)
   * [Use Case Solutions](#use-case-solutions)
     * [Solution: Exclusive Resource](#solution-exclusive-resource)
     * [Solution: Global Resource](#solution-global-resource)
-    * [Solution: Scoped Resource](#solution-scoped-resource)
+    * [Solution: Application Resource](#solution-application-resource)
     * [Solution: User Provided Resource](#solution-user-provided-resource)
     * [Solution: Polymorophic Resource](#solution-polymorphic-resource)
-  * [Porter Bundle Index](#porter-bundle-index)
-    * [List Indexed Bundles](#list-indexed-bundles)
-    * [Register a Bundle](#register-a-bundle)
-    * [Unregister a Bundle](#unregister-a-bundle)
-  * [Post-Install Dependency Management](#post-install-dependency-management)
-    * [Managed Dependency](#managed-dependency)
-      * [Detecting Unused Managed Dependencies](#detecting-unused-managed-dependencies)
-    * [Unmanaged Dependency](#unmanaged-dependency)
-  * [Dependency Resolution](#dependency-resolution)
 * [Implementation](#implementation)
 * [Backwards Compatibility](#backwards-compatibility)
 * [Security Implications](#security-implications)
@@ -165,6 +160,102 @@ dependencies:
           # Allow reusing an existing installation that does not have the labels specified above. By default the labels must match to reuse an installation.
           ignoreLabels: BOOL
 ```
+
+
+### Bundle Interfaces
+
+Bundle interfaces are relevant when reusing installations to satisfy a dependency and when using a different bundle that the default implementation provided by the dependency.
+
+The interface is used to validate that a dependency can be used in the following situations:
+* When a version range is specified and Porter attempts to use the highest allowed version.
+* When the user overrides the bundle used for a dependency.
+* When Porter reuses an existing installation for a dependency, though only the interface outputs are compared.
+
+Porter will always enforce a base bundle interface defined by how the dependency is used.
+If the parent bundle expects to pass a parameter or credential, the dependency must have a parameter or credential upon which it can be mapped.
+Similarly for outputs, if the parent bundle uses an output from the dependency, anything used for that dependency must generate that output.
+
+The bundle author can influence the interface of a dependency in by providing a bundle.json document (either as a reference or embedded in the dependency) that provides additional jsonschema for the parameters, credentials, and outputs.
+
+It's unrealistic to expect that every bundle will use the same consistent names for its parameters and outputs as other bundles that represent the same type of resource.
+We can't expect all bundles that install MySQL for example to use connstr for its output connection string for example.
+To accommodate this, bundle authors can agree on using a well-known identifier to indicate what that parameter, credential or output represents.
+
+When a bundle applies the identifier, it allows a consuming bundle that would depend upon it to rely on the identifer instead of requiring the name to match as well.
+
+```yaml
+credentials:
+  - name: admin-kubeconfig
+    $id: "porter.sh/interfaces/kubernetes.config.cluster-admin"
+```
+
+When wiring up the bundle, Porter uses the identifier to map from the name item in the dependency to how it is used in the consuming bundle.
+This allows a bundle to refer to the output connection string as "connstr", while some bundles defined the output as "connection-string" and others as "dbConn", etc.
+
+Porter can help maintain a set of well-known identifiers and explain what it represents so that other authors can use them.
+Bundle authors who are interested in having the widest base possible of users will be motivated to apply the identifier so that their bundle can be used across platforms.
+
+### Wiring Dependencies
+
+Dependencies defined in a bundle can be "wired" up to the parent bundle or other dependencies parameters, credentials, and outputs.
+Following the CNAB Dependencies spec, the dependencies of a bundle do not "leak" into the parent bundle's interface.
+So if a bundle depends upon another bundle that requires a credential, it is the responsibility of the parent bundle to set the dependency's credential, possibly by defining a credential on the parent bundle and then passing the credential to the dependency.
+When a user interacts with a bundle, they cannot directly set parameters and credentials of the parent bundle's dependencies, and must aways go through the parent bundle only.
+
+Below are some examples of how this wiring can look:
+
+The parent bundle's kubeconfig credential is passed to the redis dependency's kubeconfig credential.
+
+```yaml
+credentials:
+- name: kubeconfig
+
+dependencies:
+  requires:
+    - name: redis
+      bundle:
+        reference: getporter/redis:v1.0.0
+      credentials:
+        kubeconfig: bundle.credentials.kubeconfig # Note that this isn't a template variable though it uses the same syntax
+```
+
+The mysql dependency's connection-string output is passed to the myapp dependency's connstr parameter.
+This indicates to Porter that the mysql dependency should be executed before the myapp dependency.
+
+```yaml
+dependencies:
+  requires:
+    - name: myapp
+      bundle:
+        reference: getporter/myapp:v1.0.0
+      parameters:
+        connstr: bundle.dependencies.mysql.outputs.connection-string
+    - name: mysql
+      bundle:
+        reference: getporter/mysql:v5.7.13
+```
+
+* An output of a dependency can be passed to a credential of another dependency.
+* An output of a dependency be used as the output value of the parent bundle's output.
+
+### Dependency Resolution
+
+Below is the precedence in which a dependency is resolved to a bundle or existing installation:
+
+1. Bundle references or existing installations provided by the end-user.
+1. Existing installations that match the installation criteria.
+  * Matching the bundle reference is preferred over only matching the interface, even when matchInterface is true.
+  * Installations in the installation namespace are preferred over global installations when matchNamespace is false).
+  * Installations with matching labels are preferred over installations where the labels do not match when ignoreLabels is true.
+1. The highest version of the dependency's reference bundle that matches the defined version constraints.
+1. The reference specified on the dependency (the default implementation).
+
+In the future, Porter may keep a local list of bundles from which implementations may be resolved, but that is out of scope for this proposal.
+
+After Porter resolves every dependency in the graph, it generates an execution plan that specifies the order that the bundles must be executed.
+When an output from a dependency is set as a source to another dependency parameter or credential, that creates an additional constraint on the dependency graph.
+The resulting execution plan should include not only the order of the bundles but how the parameters, credentials and outputs are wired.
+If an execution plan can be generated, then the entire bundle graph should be executable without failing mid-run because the source of a parameter or credential cannot be determined, or relies up on a bundle that has not been executed yet.
 
 ### Use Case Solutions
 
@@ -329,100 +420,6 @@ If an existing installation cannot be found, the bundle cannot be installed and 
 This allows an author to require a resource, without providing a default implementation, which can be difficult when writing a bundle that can be used in multiple platforms.
 
 When matching existing installations against the bundle interface, only outputs are considered, even if the interface defines parameters and credentials as well.
-
-### Bundle Interfaces
-
-Bundle interfaces are relevant when reusing installations to satisfy a dependency and when using a different bundle that the default implementation provided by the dependency.
-
-The interface is used to validate that a dependency can be used in the following situations:
-* When a version range is specified and Porter attempts to use the highest allowed version.
-* When the user overrides the bundle used for a dependency.
-* When Porter reuses an existing installation for a dependency, though only the interface outputs are compared.
-
-Porter will always enforce a base bundle interface defined by how the dependency is used.
-If the parent bundle expects to pass a parameter or credential, the dependency must have a parameter or credential upon which it can be mapped.
-Similarly for outputs, if the parent bundle uses an output from the dependency, anything used for that dependency must generate that output.
-
-The bundle author can influence the interface of a dependency in by providing a bundle.json document (either as a reference or embedded in the dependency) that provides additional jsonschema for the parameters, credentials, and outputs.
-
-It's unrealistic to expect that every bundle will use the same consistent names for its parameters and outputs as other bundles that represent the same type of resource.
-We can't expect all bundles that install MySQL for example to use connstr for its output connection string for example.
-To accommodate this, bundle authors can agree on using a well-known identifier to indicate what that parameter, credential or output represents.
-
-When a bundle applies the identifier, it allows a consuming bundle that would depend upon it to rely on the identifer instead of requiring the name to match as well.
-
-```yaml
-credentials:
-  - name: admin-kubeconfig
-    $id: "porter.sh/interfaces/kubernetes.config.cluster-admin"
-```
-
-When wiring up the bundle, Porter uses the identifier to map from the name item in the dependency to how it is used in the consuming bundle.
-This allows a bundle to refer to the output connection string as "connstr", while some bundles defined the output as "connection-string" and others as "dbConn", etc.
-
-Porter can help maintain a set of well-known identifiers and explain what it represents so that other authors can use them.
-Bundle authors who are interested in having the widest base possible of users will be motivated to apply the identifier so that their bundle can be used across platforms.
-
-### Wiring Dependencies
-
-Dependencies defined in a bundle can be "wired" up to the parent bundle or other dependencies parameters, credentials, and outputs.
-
-Below are some examples of how this wiring can look:
-
-The parent bundle's kubeconfig credential is passed to the redis dependency's kubeconfig credential.
-
-```yaml
-credentials:
-- name: kubeconfig
-
-dependencies:
-  requires:
-    - name: redis
-      bundle:
-        reference: getporter/redis:v1.0.0
-      credentials:
-        kubeconfig: bundle.credentials.kubeconfig # Note that this isn't a template variable though it uses the same syntax
-```
-
-The mysql dependency's connection-string output is passed to the myapp dependency's connstr parameter.
-This indicates to Porter that the mysql dependency should be executed before the myapp dependency.
-
-```yaml
-dependencies:
-  requires:
-    - name: myapp
-      bundle:
-        reference: getporter/myapp:v1.0.0
-      parameters:
-        connstr: bundle.dependencies.mysql.outputs.connection-string
-    - name: mysql
-      bundle:
-        reference: getporter/mysql:v5.7.13
-```
-
-* An output of a dependency can be passed to a credential of another dependency.
-* An output of a dependency be used as the output value of the parent bundle's output.
-
-### Dependency Resolution
-
-Below is the precedence in which a dependency is resolved to a bundle or existing installation:
-
-1. Bundle references or existing installations provided by the end-user.
-1. Existing installations that match the installation criteria.
-  * Matching the bundle reference is preferred over only matching the interface, even when matchInterface is true.
-  * Installations in the installation namespace are preferred over global installations when matchNamespace is false).
-  * Installations with matching labels are preferred over installations where the labels do not match when ignoreLabels is true.
-1. The highest version of the dependency's reference bundle that matches the defined version constraints.
-1. The reference specified on the dependency (the default implementation).
-
-In the future, Porter may keep a local list of bundles from which implementations may be resolved, but that is out of scope for this proposal.
-
-After Porter resolves every dependency in the graph, it generates an execution plan that specifies the order that the bundles must be executed.
-When an output from a dependency is set as a source to another dependency parameter or credential, that creates an additional constraint on the dependency graph.
-The resulting execution plan should include not only the order of the bundles but how the parameters, credentials and outputs are wired.
-If an execution plan can be generated, then the entire bundle graph should be executable without failing mid-run because the source of a parameter or credential cannot be determined, or relies up on a bundle that has not been executed yet.
-
-___
 
 ## Implementation
 
