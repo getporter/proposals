@@ -15,8 +15,8 @@ type: "feature"
   * [Use Case: Exclusive Resource](#use-case-exclusive-resource)
   * [Use Case: Global Resource](#use-case-global-resource)
   * [Use Case: Application Resource](#use-case-application-resource)
-  * [Use Case: User Provided Resource](#use-case-user-provided-resource)
-  * [Use Case: Polymorphic Resource](#use-case-polymorphic-resource)
+  * [Use Case: User-Provided Resource](#use-case-user-provided-resource)
+  * [Use Case: Bundle Interface](#use-case-bundle-interface)
 * [Rationale](#rationale)
 * [Specification](#specification)
   * [porter.yaml](#porter-yaml)
@@ -27,8 +27,8 @@ type: "feature"
     * [Solution: Exclusive Resource](#solution-exclusive-resource)
     * [Solution: Global Resource](#solution-global-resource)
     * [Solution: Application Resource](#solution-application-resource)
-    * [Solution: User Provided Resource](#solution-user-provided-resource)
-    * [Solution: Polymorophic Resource](#solution-polymorphic-resource)
+    * [Solution: User-Provided Resource](#solution-user-provided-resource)
+    * [Solution: Bundle Interface](#solution-bundle-interface)
 * [Implementation](#implementation)
 * [Backwards Compatibility](#backwards-compatibility)
 * [Security Implications](#security-implications)
@@ -75,7 +75,7 @@ When I install the first service, a database should be created for it.
 When I install the other services, I want to share the database (and the connection string) between them.
 
 
-### Use Case: User Provided Resource
+### Use Case: User-Provided Resource
 
 > I already installed the dependency previously
 
@@ -83,7 +83,7 @@ I don't want Porter to install SQL Server for me, but I do want Porter to help c
 For example, a manually set up on-premise shared database server, the 64 core beast that you keep in the office closet.
 I want to automatically inject the connection string for the database into the bundles I install.
 
-### Use Case: Polymorphic Resource
+### Use Case: Bundle Interface
 
 > I need a dependency that fulfills an interface, which multiple dependencies are capable of providing.
 
@@ -264,8 +264,8 @@ For each use case outlined above, how can we use solve the original use cases?
 * [Solution: Exclusive Resource](#solution-exclusive-resource)
 * [Solution: Global Resource](#solution-global-resource)
 * [Solution: Scoped Resource](#solution-scoped-resource)
-* [Solution: User Provided Resource](#solution-user-provided-resource)
-* [Solution: Polymorophic Resource](#solution-polymorphic-resource)
+* [Solution: User-Provided Resource](#solution-user-provided-resource)
+* [Solution: Bundle Interface](#solution-bundle-interface)
 
 #### Solution: Exclusive Resource
 
@@ -331,7 +331,7 @@ dependencies:
         matchNamespce: true
 ```
 
-#### Solution: User Provided Resource
+#### Solution: User-Provided Resource
 
 Example:
 > I want Porter to automatically reuse existing infrastructure that I deployed outside of Porter.
@@ -389,7 +389,7 @@ $ porter install --reference myapp:v1.0.0
 # Porter automatically reuses the existing server to satisfy the dependency
 ```
 
-#### Solution: Polymorphic Resource
+#### Solution: Bundle Interface
 
 Example:
 > I want my bundle to be able depend on a bundle that provisions a specific version of MySQL and outputs the connection string, without having to take a hard dependency on a specific implementation.
