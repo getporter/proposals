@@ -30,7 +30,7 @@ ___
 > I want to be able to verify that the mixins in a bundle came from their stated source.
 
 Right now, we communicate the name of the mixins included in a bundle, and it is up to the user to decide if the bundle was built securely and actually contains the correct version of the stated mixins.
-A bundle author could use an arbitrary binary named after the mixin mixin, and the end-user couldn't tell the difference.
+A bundle author could use an arbitrary binary named after the mixin, and the end-user couldn't tell the difference.
 End-users should be able to inspect a bundle, verifying the mixins source and signatures, before running it.
 
 #### Secure Distribution
@@ -65,7 +65,7 @@ ___
 
 > I want to write mixins that are based on different OS distributions.
 
-Currently, mixin and bundle authors are restricted to using debian distributions that include apt because mixins are installed into the bundle's invocation image.
+Currently, mixin and bundle authors are restricted to using Debian distributions that include apt because mixins are installed into the bundle's invocation image.
 Separating mixins from bundles allows both mixin and bundle authors to define their invocation image however they require.
 For example, a company can base their invocation images on their secured base image of RHEL that they keep patched and use as a common base image for all their images.
 
@@ -152,5 +152,5 @@ None identified.
 ## Open Questions
 
 ### Should plugins be distributed as bundles too?
-This would require additional design for how to communicate with the grpc service inside the bundle.
+This would require additional design for how to communicate with the gRPC service inside the bundle.
 Let's look into it but keep it out of scope for this proposal.
