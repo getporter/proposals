@@ -55,7 +55,7 @@ ___
 > I want my bundle to declare not only the mixin used, but its version and source.
 
 Bundle authors are responsible for tracking which version they use with each bundle and ensuring that version is installed before building the bundle, which is a major gap in our mixin functionality.
-Before a bundle can be built, it is the author must install the mixins used by the bundle, and guess at the proper version since the mixin version is not stored in the bundle's metadata.
+Before a bundle can be built, the author must install the mixins used by the bundle, and guess at the proper version since the mixin version is not stored in the bundle's metadata.
 There should be enough information in the bundle definition such that Porter can download and use the mixins automatically.
 This would enable reproducible builds of bundles, because now all the information required to build a bundle is included in the porter.yaml, such that a CI server can replicate what the author did locally.
 
