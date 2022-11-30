@@ -12,7 +12,7 @@ type: "feature"
 
 * [Abstract](#abstract)
 * [Motivation](#motivation)
-  * [Use Case: Exclusive Resource](#use-case-exclusive-resource)
+  * [Use Case: InstallationOutputs CRD](#use-case-installationoutputs-crd)
 * [Rationale](#rationale)
 * [Specification](#specification)
 * [Implementation](#implementation)
@@ -46,10 +46,12 @@ in sync with an Installation.  This new resource would allow for controlled acce
 outputs.
 
 
-### Use Case: Populate an InstallationOutputs CRD to compliment an Installation resource.
+### Use Case: InstallationOutputs CRD
 
 > I need Kubernetes native way to access outputs from an Operator driven installation
 
+Populate an InstallationOutputs CRD to compliment an Installation resource. It should 
+be kept in sync with the latest successful action from an Installation.
 
 ## Rationale
 
@@ -69,6 +71,7 @@ TBD
   * This can then be managed by the Operator to reconcile an
     InstallationOutputs resource
 * gRPC, ttRPC, GraphQL, REST: which to use where and why
+* Use https://buf.build
 * What's public facing?  Just a new InstallationOutputs resource?
 
 ## Backwards Compatibility
