@@ -1,7 +1,7 @@
 ---
 title: "Advanced Dependencies"
 number: "003"
-status: "provisional"
+status: "implementable"
 owner: "@carolynvs"
 authors:
   - "@carolynvs"
@@ -424,7 +424,10 @@ When matching existing installations against the bundle interface, only outputs 
 
 ## Implementation
 
-All issues and pull requests are labeled with [pep003-advanced-dependencies](https://github.com/getporter/porter/issues?q=label%3Apep003-advanced-dependencies).
+All implementation work related to this PEP are labeled with `pep003-advanced-dependencies`.
+
+* [Issues](https://github.com/getporter/porter/issues?q=is%3Aissue+label%3Apep003-advanced-dependencies)
+* [Pull Requests](https://github.com/getporter/porter/pulls?q=is%3Apr+label%3Apep003-advanced-dependencies)
 
 ---
 
