@@ -135,7 +135,8 @@ dependencies:
           reference: FULL_BUNDLE_REFERENCE
           # Specifies additional constraints that should be added to the bundle interface. Either bundle or reference may be specified but not both.
           # By default porter only requires the name and the type to match, additional jsonschema values can be specified to restrict matching bundles even further.
-          bundle:
+          # In the CNAB spec, you can embed an entire bundle.json document under "document". In Porter, we only support parameters, credentials and outputs, and they must be specified using Porter's syntax.
+          document:
             parameters:
               - name: PARAMETER_NAME
                 type: PARAMETER_TYPE
@@ -216,7 +217,7 @@ dependencies:
       bundle:
         reference: getporter/redis:v1.0.0
       credentials:
-        kubeconfig: bundle.credentials.kubeconfig # Note that this isn't a template variable though it uses the same syntax
+        kubeconfig: ${ bundle.credentials.kubeconfig } # This isn't full template syntax, see Q&A for details
 ```
 
 The mysql dependency's connection-string output is passed to the myapp dependency's connstr parameter.
@@ -229,7 +230,7 @@ dependencies:
       bundle:
         reference: getporter/myapp:v1.0.0
       parameters:
-        connstr: bundle.dependencies.mysql.outputs.connection-string
+        connstr: ${ bundle.dependencies.mysql.outputs.connection-string } # This isn't full template syntax, see Q&A for details
     - name: mysql
       bundle:
         reference: getporter/mysql:v5.7.13
@@ -284,7 +285,7 @@ dependencies:
         reference: getporter/redis:v1.0.2
       installation: 
         labels:
-          installation: "{{ installation.name }}"
+          installation: ${ installation.name } # This isn't full template syntax, see Q&A for details
 ```
 
 
@@ -376,7 +377,7 @@ install:
     description: "Install something that needs a connection string"
     commands: ./install.sh
     arguments:
-    - "{{ bundle.dependencies.sqlserver.outputs.dbCon }}"
+    - ${ bundle.dependencies.sqlserver.outputs.dbCon }
 ```
 
 Here is what it would look like for an administrator to register the existing server and then use it.
@@ -412,7 +413,7 @@ install:
     description: "Install something that needs a connection string"
     commands: ./install.sh
     arguments:
-    - "{{ bundle.dependencies.sqlserver.outputs.dbCon }}"
+    - ${ bundle.dependencies.sqlserver.outputs.dbCon }
 ```
 
 When Porter installs the bundle, it first tries to reuse an existing installation that has an output with id "mysql-5.7-connection-string".
@@ -423,11 +424,7 @@ When matching existing installations against the bundle interface, only outputs 
 
 ## Implementation
 
-<!--
-After the PEP status is changed to implementable, when the PEP has been
-implemented link to the pull request(s) here.
--->
-
+All issues and pull requests are labeled with [pep003-advanced-dependencies](https://github.com/getporter/porter/issues?q=label%3Apep003-advanced-dependencies).
 
 ---
 
@@ -475,3 +472,9 @@ Q. The current format uses an array to create an explicit ordering of the depend
 Now that Porter resolves its own ordering, should we stick with the array to be consistent with how we define other things, like parameters, or should we use a map to reinforce that the ordering is not based on the order of the dependencies in the array?
 
 A. For consistency and better autocomplete experience, we will stick with an array.
+
+### Do we want to use template syntax for dependency wiring?
+
+Q. Should we use the template delimiters for the dependency wiring, e.g. `${bundle.dependencies.mysql.output.connstr}`, to be consistent with how we access that data elsewhere in the bundle or should we use a different format to make it clear that it can't be composed like the templates can?
+
+A. This is TBD and will need to be played with more in the implementation phase. Supporting template syntax would be nice for consistency and would make autocomplete in VS Code easier. But it's not clear yet how much more difficult it will make implementation, or if it will create unreasonable expectations in users that they should be able to use things like string concatenation (which isn't supported). You won't be able to do something like `${bundle.parameters.host}:${bundle.parameters.port}` in dependency wiring.
