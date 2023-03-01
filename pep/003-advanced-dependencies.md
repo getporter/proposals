@@ -1,5 +1,5 @@
 ---
-title: "Dependency Namespaces and Labels"
+title: "Advanced Dependencies"
 number: "003"
 status: "provisional"
 owner: "@carolynvs"
