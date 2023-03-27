@@ -140,6 +140,7 @@ ___
 ## Specification
 
 * [porter.yaml](#porter-yaml)
+* [bundle.json](#bundle-juson)
 * [Bundle Interfaces](#bundle-interfaces)
 * [Wiring Dependencies](#wiring-dependencies)
 * [Dependency Resolution](#dependency-resolution)
@@ -222,6 +223,107 @@ dependencies:
 ```
 
 
+### bundle.json
+
+Porter represents its bundle dependencies in the `org.getporter.dependencies@v2` custom CNAB extension.
+If CNAB is interested in having this implementation of dependencies in the spec, we would collaborate on how it should look when translated to CNAB (for example, we use templates which CNAB doesn't support) and use the CNAB domain with a new extension.
+Porter could then support both extensions, and bundles could opt-into a newer version of the dependencies extension by rebuilding the bundle.
+
+Below is an example of how porter.yaml is converted to bundle.json.
+Remember that after a bundle is built, Porter always uses the bundle.json to interact with the bundle.
+Even "porter only" features, must be encoded in the bundle.json as custom extensions.
+
+**porter.yaml**
+```yaml
+dependencies:
+  requires:
+    - name: infra
+      bundle:
+        reference: "localhost:5000/myinfra:v0.1.0"
+      sharing:
+        mode: group
+        group:
+          name: myapp
+      credentials:
+        token: ${bundle.credentials.token}
+      parameters:
+        database: myenvdb
+        logLevel: ${bundle.parameters.logLevel}
+    - name: app
+      bundle:
+        reference: "localhost:5000/myapp:v1.2.3"
+      sharing:
+        mode: group
+        group:
+          name: myapp
+      credentials:
+        db-connstr: ${bundle.dependencies.infra.outputs.mysql-connstr}
+      parameters:
+        logLevel: ${bundle.parameters.logLevel}
+      outputs:
+        endpoint: "https://${bundle.dependencies.infra.outputs.ip}:${outputs.port}/myapp"
+```
+
+**bundle.json**
+```json
+{
+  "org.getporter.dependencies@v2": {
+    "requires": {
+      "app": {
+        "bundle": "localhost:5000/myapp:v1.2.3",
+        "sharing": {
+          "mode": "group",
+          "group": {
+            "name": "myapp"
+          }
+        },
+        "parameters": {
+          "logLevel": "${bundle.parameters.logLevel}"
+          }
+        },
+        "credentials": {
+          "db-connstr": "${bundle.dependencies.infra.outputs.mysql-connstr}"
+        },
+        "outputs": {
+          "endpoint": "https://${bundle.dependencies.infra.outputs.ip}:${outputs.port}/myapp"
+        }
+      },
+      "infra": {
+        "bundle": "localhost:5000/myinfra:v0.1.0",
+        "sharing": {
+          "mode": "group",
+          "group": {
+            "name": "myapp"
+          }
+        },
+        "parameters": {
+          "database": "myenvdb",
+          "logLevel": "${bundle.parameters.logLevel}"
+        },
+        "credentials": {
+          "token": "${bundle.credentials.token}"
+        }
+      }
+    }
+  }
+}
+```
+
+#### Templates
+
+Bundle authors can use template syntax when passing data between dependencies and the parent bundle.
+This makes it easier to adapt bundles from other authors and reuse them in a bundle without having to write code to tweak inputs and outputs.
+For example, a bundle may output a port and a host and another requires that those variables are combined into a single URI and with templates an author can alter the shape of the data passed between bundles to match what they expect.
+
+Porter uses its template framework in the dependencies custom extension and the template must be rendered before the dependency graph can be resolved.
+How template variables are used may create additional constraints on the dependency graph and affect the execution order.
+
+The following template variables are supported in the dependencies extension:
+
+* `bundle.*` such as bundle.version
+* `installation.*` such as installation.root.id, which is used to provide a unique identifier for the dependency graph generated for the root installation
+* `outputs.OUTPUT_NAME`. This is a new template variable that is only available when specifying how to promote outputs from a dependency to the parent bundle. It is the equivalent of bundle.dependencies.DEP.outputs.OUTPUT_NAME, and is provided because it is shorter and less error prone because the dependency key is based on the context of where it is used.
+
 ### Bundle Interfaces
 
 Bundle interfaces are relevant when using a different bundle than what the dependency specified.
@@ -236,7 +338,7 @@ A dependency's bundle interface is composed from:
 * Outputs of the dependency that are used by the parent bundle.
 * Outputs, credentials, and parameters defined in the dependency's interface.reference or interface.document fields.
 
-The bundle author can choose to define a more restrictive bundle interface than what Porter can infer from how the dependency is used by providing a bundle.json document via interface.reference which is an OCI reference or interface.document which is an embedded sub-document in the dependency definigiont.
+The bundle author can choose to define a more restrictive bundle interface than what Porter can infer from how the dependency is used by providing a bundle.json document via interface.reference which is an OCI reference or interface.document which is an embedded sub-document in the dependency definition.
 This document provides additional jsonschema for the parameters, credentials, and outputs.
 
 #### Unmapped Credentials/Parameters
@@ -685,7 +787,7 @@ A. For consistency and better autocomplete experience, we will stick with an arr
 
 Q. Should we use the template delimiters for the dependency wiring, e.g. `${bundle.dependencies.mysql.output.connstr}`, to be consistent with how we access that data elsewhere in the bundle or should we use a different format to make it clear that it can't be composed like the templates can?
 
-A. We've vetted using template syntax in a few places in dependency definitions and have verified that it's possible,and that we can support more than single variable injection. So yes, we will continue to be consistent and use the same template syntax.
+A. We've vetted using template syntax in a few places in dependency definitions and have verified that it's possible, and that we can support more than single variable injection. So yes, we will continue to be consistent and use the same template syntax.
 
 ### How does bundle interfaces and version ranges mix with the concept of immutable bundles?
 
