@@ -171,7 +171,7 @@ dependencies:
         # Porter always infers a base interface based on how the dependency is used in porter.yaml
         interface:
           # The URI of the interface, usually a well-known name but not necessarily
-          # For example, https://getporter.org/interfaces/
+          # For example, https://getporter.org/interfaces/#mysql
           id: INTERFACE_URI
           # Specifies a bundle to use as the interface on top of how the bundle is used.
           reference: FULL_BUNDLE_REFERENCE
@@ -220,6 +220,14 @@ dependencies:
         # For example, to only allow other bundles that were installed with this bundle to reuse the dependency, you can use the root installation's id with ${ installation.root.ID }. The root installation is the installation that was requested to be installed first, and is the root node in the dependency graph. If you originally ran the command `porter install wordpress`, wordpress is the root installation.
         group:
           name: GROUP_NAME
+  
+  # Declare that the current bundle can satisfy dependencies
+  provides:
+    # Define the interface that this bundle implements
+    interface:
+      # Specifies the name of the interface
+      # Example: https://getporter.org/interfaces/#mysql
+      id: INTERFACE_URL 
 ```
 
 
@@ -420,7 +428,7 @@ status:
     # The well-known bundle interface(s) that the installation's bundle declares.
     provides:
       interface:
-        name: https://getporter.org/interfaces#redis-7
+        id: https://getporter.org/interfaces/#redis
 ```
 
 
