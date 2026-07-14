@@ -144,6 +144,7 @@ ___
 * [Bundle Interfaces](#bundle-interfaces)
 * [Wiring Dependencies](#wiring-dependencies)
 * [Dependency Resolution](#dependency-resolution)
+* [Archiving and Publishing Dependencies](#archiving-and-publishing-dependencies)
 * [Use Case Solutions](#use-case-solutions)
 
 The heart of the solution for all of the above use cases is reducing them to a single decision: "GetOrCreate".
@@ -494,6 +495,42 @@ When an output from a dependency is set as a source to another dependency parame
 The resulting execution plan should include not only the order of the bundles but how the parameters, credentials and outputs are wired.
 If an execution plan can be generated, then the entire bundle graph should be executable without failing mid-run because the source of a parameter or credential cannot be determined, or relies up on a bundle that has not been executed yet.
 
+### Archiving and Publishing Dependencies
+
+When a bundle depends on other bundles, `porter archive` and `porter publish --archive` must carry those dependencies across the airgap and keep dependency references resolvable once the bundle lands in a disconnected registry.
+
+#### Archive Format
+
+When archiving a bundle that has dependencies, each dependency is archived into the same tgz, under a `dependencies/` directory, using the same layout as the root bundle:
+
+```
+bundlename-version.tgz
+- layers
+- manifest.json
+- dependencies/
+  - depname-depversion/
+    - layers
+    - manifest.json
+```
+
+`porter archive` only includes the exact resolved dependency version referenced by the bundle being archived, not every version that could satisfy a version range.
+
+By default, `porter archive` includes the full dependency graph in the archive. Passing `--no-deps` archives only the root bundle, for cases where dependencies will be archived or moved separately.
+
+#### Publishing From an Archive
+
+`porter publish --archive` must publish every dependency before the root bundle it belongs to, in reverse-dependency order, so a bundle is never pushed before the dependencies it requires.
+
+For each dependency published this way, its reference is rewritten in the published bundle.json from a tag to the repository digest at its new location (the same mechanism already used to relocate invocation images), and an entry is added to `relocation-mapping.json`:
+
+```json
+{
+  "example.com/mysql@sha256:abc123": "localhost:5000/mysql@sha256:RELOCATED_DIGEST"
+}
+```
+
+This relocation behavior is scoped to publishing **from an archive** only. A normal `porter publish` (no archive involved) does not relocate or copy dependency bundles — dependencies are expected to already be reachable and shared at their original location, and copying them on every publish would defeat sharing and bloat registries.
+
 ### Use Case Solutions
 
 For each use case outlined above, how can we use solve the original use cases?
@@ -810,5 +847,11 @@ End-users can also control the versions selected when porter installs a bundle w
 
 Until dependencies v2 is adopted in CNAB, we will use the getporter.org domain.
 Once adopted, bundle authors can opt-into using the CNAB domain by updating their bundle definition.
+
+### Should archiving a bundle include its dependencies by default?
+
+Q. Should `porter archive` default to bundling the full dependency graph into a single tgz, or default to archiving only the root bundle and require an explicit flag to pull in dependencies?
+
+A. Default to including the full dependency graph, since the primary use case for archiving is moving a bundle across an airgap where dependencies won't otherwise be reachable. Pass `--no-deps` to archive only the root bundle.
 
 [PEP005]: https://github.com/getporter/proposals/blob/main/pep/005-mixins-are-bundles.md
