@@ -333,6 +333,12 @@ The following template variables are supported in the dependencies extension:
 * `installation.*` such as installation.root.id, which is used to provide a unique identifier for the dependency graph generated for the root installation
 * `outputs.OUTPUT_NAME`. This is a new template variable that is only available when specifying how to promote outputs from a dependency to the parent bundle. It is the equivalent of bundle.dependencies.DEP.outputs.OUTPUT_NAME, and is provided because it is shorter and less error prone because the dependency key is based on the context of where it is used.
 
+`bundle.dependencies.DEP.outputs.OUTPUT_NAME` (and the `outputs.OUTPUT_NAME` shorthand) are only valid inside the `dependencies.requires[]` block, i.e. when wiring a dependency's output to another dependency's parameter/credential, or when promoting it to a bundle output.
+They cannot be used in action steps (install, upgrade, uninstall, custom actions, etc).
+This keeps the meaning of a dependency's output unambiguous: it is always the raw value produced by the dependency, never a value that has been reshaped by a promotion mapping declared elsewhere.
+Action steps that need dependency data must reference the promoted value via `bundle.outputs.OUTPUT_NAME` instead, same as any other bundle output.
+Porter validates this restriction for bundles using the `dependencies-v2` extension and rejects a bundle definition that references `bundle.dependencies.*` outside of `dependencies.requires[]`, with an error message pointing at the offending step and suggesting the output be promoted first.
+
 ### Bundle Interfaces
 
 Bundle interfaces are relevant when using a different bundle than what the dependency specified.
@@ -712,13 +718,15 @@ dependencies:
         outputs:
           - name: dbCon
             $id: "azure-sql-server-connection-string"
+    outputs:
+      dbCon: ${ outputs.dbCon } # promote the dependency's output to a bundle output
 
 install:
 - exec:
     description: "Install something that needs a connection string"
     commands: ./install.sh
     arguments:
-    - ${ bundle.dependencies.sqlserver.outputs.dbCon }
+    - ${ bundle.outputs.dbCon }
 ```
 
 Here is what it would look like for an administrator to register the existing server and then use it.
@@ -749,13 +757,15 @@ dependencies:
         outputs:
           - name: dbCon
             $id: "mysql-5.7-connection-string"
+    outputs:
+      dbCon: ${ outputs.dbCon } # promote the dependency's output to a bundle output
 
 install:
 - exec:
     description: "Install something that needs a connection string"
     commands: ./install.sh
     arguments:
-    - ${ bundle.dependencies.sqlserver.outputs.dbCon }
+    - ${ bundle.outputs.dbCon }
 ```
 
 When Porter installs the bundle, it first tries to reuse an existing installation that has an output with id "mysql-5.7-connection-string".
@@ -791,6 +801,11 @@ In CNAB, dependencies v2 is defined in a new custom extension, `org.getporter.de
 Later we can transition to an agreed upon extension in the CNAB namespace if the custom extension is adopted by CNAB.
 At that point, Porter can support its own extension and the new CNAB extension at the same time.
 Bundles that originally used Porter's custom extension can be rebuilt to switch to the CNAB dependencies extension.
+
+Earlier drafts of this PEP showed `bundle.dependencies.DEP.outputs.NAME` used directly in action steps (see [#18](https://github.com/getporter/proposals/issues/18)).
+This is no longer allowed; see [Templates](#templates).
+Because `dependencies-v2` is still feature-flagged and unreleased, this is not a breaking change for any published bundle.
+Porter's schema validation for the `dependencies-v2` extension flags any remaining use of `bundle.dependencies.*` outside of `dependencies.requires[]`, and the error message tells the author to promote the output (`dependencies.requires[].outputs`) and reference it via `bundle.outputs.NAME` instead.
 
 ___
 
